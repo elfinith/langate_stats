@@ -1,0 +1,13 @@
+#!/bin/bash
+S=15
+Frx=/sys/class/net/eth1/statistics/rx_bytes
+Ftx=/sys/class/net/eth1/statistics/tx_bytes
+BPS=999999
+Xrx=`cat $Frx`
+Xtx=`cat $Ftx`
+sleep $S
+Yrx=`cat $Frx`
+Ytx=`cat $Ftx`
+BPSrx="$(((Yrx/125-Xrx/125)/S))";
+BPStx="$(((Ytx/125-Xtx/125)/S))";
+echo $BPSrx Kbit $BPStx Kbit

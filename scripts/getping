@@ -1,0 +1,7 @@
+#!/bin/bash
+ping -c 1 $1 &> /dev/null
+if [ $? -ne 0 ]; then
+    echo "`date '+%F %T'`: PING [$1] FAILED"
+else
+    echo "`date '+%F %T'`: ping [$1] ok"
+fi
