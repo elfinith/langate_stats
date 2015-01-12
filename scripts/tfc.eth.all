@@ -1,0 +1,61 @@
+#!/bin/bash
+# файлы с новыми значениями
+Frx0=/sys/class/net/eth0/statistics/rx_bytes
+Ftx0=/sys/class/net/eth0/statistics/tx_bytes
+Frx1=/sys/class/net/eth1/statistics/rx_bytes
+Ftx1=/sys/class/net/eth1/statistics/tx_bytes
+# файлы со старыми значениями
+Hrx0=/home/cache/stats/test/data/ifaces/eth0.rx.bytes
+Htx0=/home/cache/stats/test/data/ifaces/eth0.tx.bytes
+Hrx1=/home/cache/stats/test/data/ifaces/eth1.rx.bytes
+Htx1=/home/cache/stats/test/data/ifaces/eth1.tx.bytes
+# тыц навсякий
+touch $Hrx0
+touch $Htx0
+touch $Hrx1
+touch $Htx1
+# новые значения
+Yrx0=`cat $Frx0`
+Ytx0=`cat $Ftx0`
+Yrx1=`cat $Frx1`
+Ytx1=`cat $Ftx1`
+# старые значения
+Xrx0=`cat $Hrx0`
+Xtx0=`cat $Htx0`
+Xrx1=`cat $Hrx1`
+Xtx1=`cat $Htx1`
+# проверка обнулившихся значений счётчиков (при перезагрузке интерфейса случается)
+if [ $Xrx0 -gt $Yrx0 ]
+then
+    cat $Frx0 > $Hrx0
+    Xrx0=`cat $Frx0`
+fi
+if [ $Xtx0 -gt $Ytx0 ]
+then
+    cat $Ftx0 > $Htx0
+    Xtx0=`cat $Ftx0`
+fi
+if [ $Xrx1 -gt $Yrx1 ]
+then
+    cat $Frx1 > $Hrx1
+    Xrx1=`cat $Frx1`
+fi
+if [ $Xtx1 -gt $Ytx1 ]
+then
+    cat $Ftx1 > $Htx1
+    Xtx1=`cat $Ftx1`
+fi
+# вычисляем разницу в килобитах
+BPSrx0="$((Yrx0/125-Xrx0/125))"
+BPStx0="$((Ytx0/125-Xtx0/125))"
+BPSrx1="$((Yrx1/125-Xrx1/125))"
+BPStx1="$((Ytx1/125-Xtx1/125))"
+# вывод
+(date '+%F,%T' | tr '\n' ','; echo $BPSrx0','$BPStx0','$BPSrx1','$BPStx1 ) | tee
+# сохраняем новые значеняи как старые
+cat $Frx0 > $Hrx0
+cat $Ftx0 > $Htx0
+cat $Frx1 > $Hrx1
+cat $Ftx1 > $Htx1
+
+

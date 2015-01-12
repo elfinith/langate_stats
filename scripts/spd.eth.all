@@ -1,0 +1,20 @@
+#!/bin/bash
+S=15
+Frx0=/sys/class/net/eth0/statistics/rx_bytes
+Ftx0=/sys/class/net/eth0/statistics/tx_bytes
+Frx1=/sys/class/net/eth1/statistics/rx_bytes
+Ftx1=/sys/class/net/eth1/statistics/tx_bytes
+Xrx0=`cat $Frx0`
+Xtx0=`cat $Ftx0`
+Xrx1=`cat $Frx1`
+Xtx1=`cat $Ftx1`
+sleep $S
+Yrx0=`cat $Frx0`
+Ytx0=`cat $Ftx0`
+Yrx1=`cat $Frx1`
+Ytx1=`cat $Ftx1`
+BPSrx0="$(((Yrx0/125-Xrx0/125)/S))";
+BPStx0="$(((Ytx0/125-Xtx0/125)/S))";
+BPSrx1="$(((Yrx1/125-Xrx1/125)/S))";
+BPStx1="$(((Ytx1/125-Xtx1/125)/S))";
+(date '+%F,%T' | tr '\n' ','; echo $BPSrx0','$BPStx0','$BPSrx1','$BPStx1 | tr '\n' ',' ; /usr/sbin/ss -nta -o state established | grep '192.168.0.245' | wc -l | tr '\n' ','; /usr/sbin/ss -nta -o state established | grep '192.168.11.245' | wc -l) | tee

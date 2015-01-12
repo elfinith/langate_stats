@@ -1,0 +1,19 @@
+#!/bin/bash
+IFACE1_NAME='eth0'
+IFACE1_PING_IP='192.168.0.240'
+IFACE2_NAME='eth1'
+IFACE2_PING_IP='192.168.11.244'
+ping -c 1 $IFACE1_PING_IP &> /dev/null
+if [ $? -ne 0 ]; then
+  (date '+%F %T' | tr '\n' ' '; echo ping $IFACE1_PING_IP FAILED, restarting $IFACE1_NAME) | tee >> /home/cache/log/internet.connection.log
+  /sbin/ifdown $IFACE1_NAME && /sbin/ifup $IFACE1_NAME
+else
+  echo $IFACE1_NAME OK
+fi
+ping -c 1 $IFACE2_PING_IP &> /dev/null
+if [ $? -ne 0 ]; then
+  (date '+%F %T' | tr '\n' ' '; echo ping $IFACE2_PING_IP FAILED, restarting $IFACE2_NAME) | tee >> /home/cache/log/internet.connection.log
+  /sbin/ifdown $IFACE2_NAME && /sbin/ifup $IFACE2_NAME
+else
+  echo $IFACE2_NAME OK
+fi
