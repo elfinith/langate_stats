@@ -28,8 +28,7 @@ Xtx1=`cat $Htx1`
 if [ $Xrx0 -gt $Yrx0 ]
 then
     cat $Frx0 > $Hrx0
-#    Xrx0=$((Yrx0-1250))
-    BPSrx0=$Yrx0
+    BPSrx0=$((Yrx0/125))
 else
     # вычисляем разницу в килобитах
     BPSrx0="$((Yrx0/125-Xrx0/125))"
@@ -37,8 +36,7 @@ fi
 if [ $Xtx0 -gt $Ytx0 ]
 then
     cat $Ftx0 > $Htx0
-#    Xtx0=$((Ytx0-1250))
-    BPStx0=$Ytx0
+    BPStx0=$((Ytx0/125))
 else
     # вычисляем разницу в килобитах
     BPStx0="$((Ytx0/125-Xtx0/125))"
@@ -46,8 +44,7 @@ fi
 if [ $Xrx1 -gt $Yrx1 ]
 then
     cat $Frx1 > $Hrx1
-#    Xrx1=$((Yrx1-1250))
-    BPSrx1=$Yrx1
+    BPSrx1=$((Yrx1/125))
 else
     # вычисляем разницу в килобитах
     BPSrx1="$((Yrx1/125-Xrx1/125))"
@@ -55,8 +52,7 @@ fi
 if [ $Xtx1 -gt $Ytx1 ]
 then
     cat $Ftx1 > $Htx1
-#    Xtx1=$((Ytx1-1250))
-    BPStx1=$Ytx1
+    BPStx1=$((Ytx1/125))
 else
     # вычисляем разницу в килобитах
     BPStx1="$((Ytx1/125-Xtx1/125))"
