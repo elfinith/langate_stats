@@ -25,32 +25,42 @@ Xtx0=`cat $Htx0`
 Xrx1=`cat $Hrx1`
 Xtx1=`cat $Htx1`
 # проверка обнулившихся значений счётчиков (при перезагрузке интерфейса случается)
-# разность 10 для того, чтобы избежать нулевого значения разности (криво отображается на графике)
 if [ $Xrx0 -gt $Yrx0 ]
 then
     cat $Frx0 > $Hrx0
-    Xrx0=$((Yrx0-1250))
+#    Xrx0=$((Yrx0-1250))
+    BPSrx0=$Yrx0
+else
+    # вычисляем разницу в килобитах
+    BPSrx0="$((Yrx0/125-Xrx0/125))"
 fi
 if [ $Xtx0 -gt $Ytx0 ]
 then
     cat $Ftx0 > $Htx0
-    Xtx0=$((Ytx0-1250))
+#    Xtx0=$((Ytx0-1250))
+    BPStx0=$Ytx0
+else
+    # вычисляем разницу в килобитах
+    BPStx0="$((Ytx0/125-Xtx0/125))"
 fi
 if [ $Xrx1 -gt $Yrx1 ]
 then
     cat $Frx1 > $Hrx1
-    Xrx1=$((Yrx1-1250))
+#    Xrx1=$((Yrx1-1250))
+    BPSrx1=$Yrx1
+else
+    # вычисляем разницу в килобитах
+    BPSrx1="$((Yrx1/125-Xrx1/125))"
 fi
 if [ $Xtx1 -gt $Ytx1 ]
 then
     cat $Ftx1 > $Htx1
-    Xtx1=$((Ytx1-1250))
+#    Xtx1=$((Ytx1-1250))
+    BPStx1=$Ytx1
+else
+    # вычисляем разницу в килобитах
+    BPStx1="$((Ytx1/125-Xtx1/125))"
 fi
-# вычисляем разницу в килобитах
-BPSrx0="$((Yrx0/125-Xrx0/125))"
-BPStx0="$((Ytx0/125-Xtx0/125))"
-BPSrx1="$((Yrx1/125-Xrx1/125))"
-BPStx1="$((Ytx1/125-Xtx1/125))"
 # вывод
 (date '+%F,%T' | tr '\n' ','; echo $BPSrx0','$BPStx0','$BPSrx1','$BPStx1 ) | tee
 # сохраняем новые значеняи как старые
