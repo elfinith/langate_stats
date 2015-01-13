@@ -5,10 +5,10 @@ Ftx0=/sys/class/net/eth0/statistics/tx_bytes
 Frx1=/sys/class/net/eth1/statistics/rx_bytes
 Ftx1=/sys/class/net/eth1/statistics/tx_bytes
 # файлы со старыми значениями
-Hrx0=/home/cache/stats/test/data/ifaces/eth0.rx.bytes
-Htx0=/home/cache/stats/test/data/ifaces/eth0.tx.bytes
-Hrx1=/home/cache/stats/test/data/ifaces/eth1.rx.bytes
-Htx1=/home/cache/stats/test/data/ifaces/eth1.tx.bytes
+Hrx0=../data/ifaces/eth0.rx.bytes
+Htx0=../data/ifaces/eth0.tx.bytes
+Hrx1=../data/ifaces/eth1.rx.bytes
+Htx1=../data/ifaces/eth1.tx.bytes
 # тыц навсякий
 touch $Hrx0
 touch $Htx0
@@ -29,22 +29,22 @@ Xtx1=`cat $Htx1`
 if [ $Xrx0 -gt $Yrx0 ]
 then
     cat $Frx0 > $Hrx0
-    Xrx0=$Yrx0-10
+    Xrx0=$((Yrx0-1250))
 fi
 if [ $Xtx0 -gt $Ytx0 ]
 then
     cat $Ftx0 > $Htx0
-    Xtx0=$Ytx0-10
+    Xtx0=$((Ytx0-1250))
 fi
 if [ $Xrx1 -gt $Yrx1 ]
 then
     cat $Frx1 > $Hrx1
-    Xrx1=$Yrx1-10
+    Xrx1=$((Yrx1-1250))
 fi
 if [ $Xtx1 -gt $Ytx1 ]
 then
     cat $Ftx1 > $Htx1
-    Xtx1=$Ytx1-10
+    Xtx1=$((Ytx1-1250))
 fi
 # вычисляем разницу в килобитах
 BPSrx0="$((Yrx0/125-Xrx0/125))"

@@ -1,9 +1,9 @@
 #!/bin/bash
 cd /home/cache/stats/test/scripts
-(getping 192.168.11.244 |tr '\n' ' '; getping 8.8.8.8 | tr '\n' ' '; getping owa.oat-group.ru | tr '\n' ' '; spd.eth1) | tee >> /home/cache/log/internet.connection.log
+(./getping 192.168.11.244 |tr '\n' ' '; ./getping 8.8.8.8 | tr '\n' ' '; ./getping owa.oat-group.ru | tr '\n' ' '; ./spd.eth1) | tee >> /home/cache/log/internet.connection.log
 ( date '+%F %T' | tr '\n' ' '; /usr/sbin/lsof -i :443 | grep mail.oat-group.ru | wc -l | tr '\n' ' '; /usr/sbin/lsof -i :1143 | wc -l | tr '\n' ' ';  ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c17-25) | tee >> /home/cache/log/owa.oat-group.ru.count.log
 cat /home/cache/log/owa.oat-group.ru.count.log | tr ' ' ',' | tr -s , | sed 's/.$//' > ../data/owa.oat-group.ru.count.csv
 grep FAIL /home/cache/log/internet.connection.log > ../data/fails.txt
-spd.eth.all >> ../data/speed.ifaces.csv
-tfc.eth.all >> ../data/traffic.ifaces.csv
-watch.ifaces
+./spd.eth.all >> ../data/speed.ifaces.csv
+./tfc.eth.all >> ../data/traffic.ifaces.csv
+./watch.ifaces
