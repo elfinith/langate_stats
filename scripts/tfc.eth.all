@@ -28,35 +28,28 @@ Xtx1=`cat $Htx1`
 if [ $Xrx0 -gt $Yrx0 ]
 then
     cat $Frx0 > $Hrx0
-    BPSrx0=$((Yrx0/125))
-else
-    # вычисляем разницу в килобитах
-    BPSrx0="$((Yrx0/125-Xrx0/125))"
+	Xrx0=0
 fi
 if [ $Xtx0 -gt $Ytx0 ]
 then
     cat $Ftx0 > $Htx0
-    BPStx0=$((Ytx0/125))
-else
-    # вычисляем разницу в килобитах
-    BPStx0="$((Ytx0/125-Xtx0/125))"
+	Xtx0=0
 fi
 if [ $Xrx1 -gt $Yrx1 ]
 then
     cat $Frx1 > $Hrx1
-    BPSrx1=$((Yrx1/125))
-else
-    # вычисляем разницу в килобитах
-    BPSrx1="$((Yrx1/125-Xrx1/125))"
+	Xrx1=0
 fi
 if [ $Xtx1 -gt $Ytx1 ]
 then
     cat $Ftx1 > $Htx1
-    BPStx1=$((Ytx1/125))
-else
-    # вычисляем разницу в килобитах
-    BPStx1="$((Ytx1/125-Xtx1/125))"
+	Xtx1=0
 fi
+# вычисляем разницу в килобитах
+BPSrx0="$((Yrx0/125-Xrx0/125))"
+BPStx0="$((Ytx0/125-Xtx0/125))"
+BPSrx1="$((Yrx1/125-Xrx1/125))"
+BPStx1="$((Ytx1/125-Xtx1/125))"
 # вывод
 (date '+%F,%T' | tr '\n' ','; echo $BPSrx0','$BPStx0','$BPSrx1','$BPStx1 ) | tee
 # сохраняем новые значеняи как старые
