@@ -25,25 +25,26 @@ Xtx0=`cat $Htx0`
 Xrx1=`cat $Hrx1`
 Xtx1=`cat $Htx1`
 # проверка обнулившихся значений счётчиков (при перезагрузке интерфейса случается)
+# разность 10 для того, чтобы избежать нулевого значения разности (криво отображается на графике)
 if [ $Xrx0 -gt $Yrx0 ]
 then
     cat $Frx0 > $Hrx0
-    Xrx0=`cat $Frx0`
+    Xrx0=$Yrx0-10
 fi
 if [ $Xtx0 -gt $Ytx0 ]
 then
     cat $Ftx0 > $Htx0
-    Xtx0=`cat $Ftx0`
+    Xtx0=$Ytx0-10
 fi
 if [ $Xrx1 -gt $Yrx1 ]
 then
     cat $Frx1 > $Hrx1
-    Xrx1=`cat $Frx1`
+    Xrx1=$Yrx1-10
 fi
 if [ $Xtx1 -gt $Ytx1 ]
 then
     cat $Ftx1 > $Htx1
-    Xtx1=`cat $Ftx1`
+    Xtx1=$Ytx1-10
 fi
 # вычисляем разницу в килобитах
 BPSrx0="$((Yrx0/125-Xrx0/125))"
@@ -57,5 +58,3 @@ cat $Frx0 > $Hrx0
 cat $Ftx0 > $Htx0
 cat $Frx1 > $Hrx1
 cat $Ftx1 > $Htx1
-
-
