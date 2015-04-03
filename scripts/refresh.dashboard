@@ -1,45 +1,68 @@
 #!/bin/bash
 declare -a graph
-REFRESHRATE='1s'
-GRAPHLENGTH=50
-GRAPHDATA='../data/graph-data.json'
+REFRESHRATE='2s'
+GRAPHLENGTH=30
+ETH0_GRAPHDATA='../data/eth0-graph-data.json'
+ETH1_GRAPHDATA='../data/eth1-graph-data.json'
 URL_DASHING='http://192.168.50.251:3030'
 URL_DVCPU=${URL_DASHING}'/widgets/davmail-cpu'
 URL_DVMEM=${URL_DASHING}'/widgets/davmail-mem'
-URL_GRAPH=${URL_DASHING}'/widgets/convergence'
+URL_ETH0_GRAPH=${URL_DASHING}'/widgets/eth0graph'
+URL_ETH1_GRAPH=${URL_DASHING}'/widgets/eth1graph'
 
-graph=0
+eth0graph=0
+eth1graph=0
 while true 
 do
     sleep $REFRESHRATE
-    # Da    
+    # Davmail CPU
     CMD=$(ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c17-20)
     DVCPU='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '$CMD' }'
     curl -d "${DVCPU}" ${URL_DVCPU}
-
+    # Davmail MEM
     CMD=$(ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c21-25)
     DVMEM='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '$CMD' }'
     curl -d "${DVMEM}" ${URL_DVMEM}
-    
+    # eth0 connections graph
     count=1
     str=''
     while [ $count -lt $(($GRAPHLENGTH)) ]
     do
 	prev=$count
         (( count++ ))
-        graph[$prev]=$((graph[$count]))
+        eth0graph[$prev]=$((eth0graph[$count]))
         if [ $prev -eq 1 ]
         then
-            str=$str'{ "x": '$prev', "y": '${graph[$prev]}' }'
+            str=$str'{ "x": '$prev', "y": '${eth0graph[$prev]}' }'
         else
-            str=$str', { "x": '$prev', "y": '${graph[$prev]}' }'
+            str=$str', { "x": '$prev', "y": '${eth0graph[$prev]}' }'
         fi
     done
-
-    graph[$GRAPHLENGTH]=$(/usr/sbin/ss -o state established | grep 192.168.11.245 | wc -l)
+    eth0graph[$GRAPHLENGTH]=$(/usr/sbin/ss -o state established | grep 192.168.0.245 | wc -l)
+    str='{ "auth_token": "YOUR_AUTH_TOKEN", "points" : [ '$str', { "x": '$GRAPHLENGTH', "y": '${eth0graph[$GRAPHLENGTH]}' } ] }'
+    echo ${str} > ${ETH0_GRAPHDATA}
+    curl -X POST --data @${ETH0_GRAPHDATA} -H "Content-Type: application/json" ${URL_ETH0_GRAPH}
+    # eth1 connections graph
+    count=1
+    str=''
+    while [ $count -lt $(($GRAPHLENGTH)) ]
+    do
+	prev=$count
+        (( count++ ))
+        eth1graph[$prev]=$((eth1graph[$count]))
+        if [ $prev -eq 1 ]
+        then
+            str=$str'{ "x": '$prev', "y": '${eth1graph[$prev]}' }'
+        else
+            str=$str', { "x": '$prev', "y": '${eth1graph[$prev]}' }'
+        fi
+    done
+    eth1graph[$GRAPHLENGTH]=$(/usr/sbin/ss -o state established | grep 192.168.11.245 | wc -l)
     # test
     # graph[$GRAPHLENGTH]=$(($RANDOM%11))
-    str='{ "auth_token": "YOUR_AUTH_TOKEN", "points" : [ '$str', { "x": '$GRAPHLENGTH', "y": '${graph[$GRAPHLENGTH]}' } ] }'
-    echo ${str} > ${GRAPHDATA}
-    curl -X POST --data @${GRAPHDATA} -H "Content-Type: application/json" ${URL_GRAPH}
+    str='{ "auth_token": "YOUR_AUTH_TOKEN", "points" : [ '$str', { "x": '$GRAPHLENGTH', "y": '${eth1graph[$GRAPHLENGTH]}' } ] }'
+    echo ${str} > ${ETH1_GRAPHDATA}
+    curl -X POST --data @${ETH1_GRAPHDATA} -H "Content-Type: application/json" ${URL_ETH1_GRAPH}
+    
+    
 done
