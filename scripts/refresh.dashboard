@@ -1,28 +1,41 @@
 #!/bin/bash
-declare -a graph
 REFRESHRATE='2s'
 GRAPHLENGTH=30
+LANGATE_WD_PERIOD=5
+# data paths
 ETH0_GRAPHDATA='../data/eth0-graph-data.json'
 ETH1_GRAPHDATA='../data/eth1-graph-data.json'
+# Dashing URL
 URL_DASHING='http://192.168.50.251:3030'
+# widget paths
 URL_DVCPU=${URL_DASHING}'/widgets/davmail-cpu'
 URL_DVMEM=${URL_DASHING}'/widgets/davmail-mem'
+URL_DVSESSIONS=${URL_DASHING}'/widgets/davmailsessions'
+URL_EXSESSIONS=${URL_DASHING}'/widgets/excsessions'
+URL_SQUIDSESSIONS=${URL_DASHING}'/widgets/squidsessions'
 URL_ETH0_GRAPH=${URL_DASHING}'/widgets/eth0graph'
 URL_ETH1_GRAPH=${URL_DASHING}'/widgets/eth1graph'
+URL_LANGATE_LOAD=${URL_DASHING}'/widgets/loadlangate'
 
+# graph arrays
 eth0graph=0
 eth1graph=0
+
+LANGATE_WD_COUNT=0
 while true 
 do
     sleep $REFRESHRATE
+
     # Davmail CPU
     CMD=$(ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c17-20)
     DVCPU='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '$CMD' }'
     curl -d "${DVCPU}" ${URL_DVCPU}
+
     # Davmail MEM
     CMD=$(ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c21-25)
     DVMEM='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '$CMD' }'
     curl -d "${DVMEM}" ${URL_DVMEM}
+
     # eth0 connections graph
     count=1
     str=''
@@ -38,10 +51,11 @@ do
             str=$str', { "x": '$prev', "y": '${eth0graph[$prev]}' }'
         fi
     done
-    eth0graph[$GRAPHLENGTH]=$(/usr/sbin/ss -o state established | grep 192.168.0.245 | wc -l)
+    eth0graph[$GRAPHLENGTH]=$(netstat -n | grep 192.168.0.245 | grep ESTABLISHED | wc -l)
     str='{ "auth_token": "YOUR_AUTH_TOKEN", "points" : [ '$str', { "x": '$GRAPHLENGTH', "y": '${eth0graph[$GRAPHLENGTH]}' } ] }'
     echo ${str} > ${ETH0_GRAPHDATA}
     curl -X POST --data @${ETH0_GRAPHDATA} -H "Content-Type: application/json" ${URL_ETH0_GRAPH}
+
     # eth1 connections graph
     count=1
     str=''
@@ -57,12 +71,35 @@ do
             str=$str', { "x": '$prev', "y": '${eth1graph[$prev]}' }'
         fi
     done
-    eth1graph[$GRAPHLENGTH]=$(/usr/sbin/ss -o state established | grep 192.168.11.245 | wc -l)
+    eth1graph[$GRAPHLENGTH]=$(netstat -n | grep 192.168.11.245 | grep ESTABLISHED | wc -l)
     # test
     # graph[$GRAPHLENGTH]=$(($RANDOM%11))
     str='{ "auth_token": "YOUR_AUTH_TOKEN", "points" : [ '$str', { "x": '$GRAPHLENGTH', "y": '${eth1graph[$GRAPHLENGTH]}' } ] }'
     echo ${str} > ${ETH1_GRAPHDATA}
     curl -X POST --data @${ETH1_GRAPHDATA} -H "Content-Type: application/json" ${URL_ETH1_GRAPH}
-    
-    
+
+    # squid sessions
+    SQ_SESSIONS=$(netstat -nat | grep :8080 | grep ESTABLISHED | awk '{print $5}'| cut -d: -f1 | sort -u | wc -l)
+    SQ_DATA='{ "auth_token": "YOUR_AUTH_TOKEN", "current": '${SQ_SESSIONS}' }'
+    curl -d "${SQ_DATA}" ${URL_SQUIDSESSIONS}
+
+    # Davmail connections
+    DV_SESSIONS=$(netstat -n | grep ':1143 ' | grep ESTABLISHED | wc -l)
+    DV_DATA='{ "auth_token": "YOUR_AUTH_TOKEN", "current": '${DV_SESSIONS}' }'
+    curl -d "${DV_DATA}" ${URL_DVSESSIONS}
+
+    # Exchange connections
+    EX_SESSIONS=$(netstat -n | grep '188.128.94.10' | grep ESTABLISHED | wc -l)
+    EX_DATA='{ "auth_token": "YOUR_AUTH_TOKEN", "current": '${EX_SESSIONS}' }'
+    curl -d "${EX_DATA}" ${URL_EXSESSIONS}
+
+    # LANGATE avg load (1min)
+    if [[ $LANGATE_WD_COUNT -eq $LANGATE_WD_PERIOD ]]
+    then
+	LANGATE_WD_COUNT=0        
+        LG_LOAD=$(uptime | awk '{print $10}' | cut -d, -f1)
+        LG_DATA='{ "auth_token": "YOUR_AUTH_TOKEN", "current": "'${LG_LOAD}'" }'
+        curl -d "${LG_DATA}" ${URL_LANGATE_LOAD}
+    fi
+    (( LANGATE_WD_COUNT++ ))
 done
