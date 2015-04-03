@@ -1,0 +1,45 @@
+#!/bin/bash
+declare -a graph
+REFRESHRATE='1s'
+GRAPHLENGTH=50
+GRAPHDATA='../data/graph-data.json'
+URL_DASHING='http://192.168.50.251:3030'
+URL_DVCPU=${URL_DASHING}'/widgets/davmail-cpu'
+URL_DVMEM=${URL_DASHING}'/widgets/davmail-mem'
+URL_GRAPH=${URL_DASHING}'/widgets/convergence'
+
+graph=0
+while true 
+do
+    sleep $REFRESHRATE
+    # Da    
+    CMD=$(ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c17-20)
+    DVCPU='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '$CMD' }'
+    curl -d "${DVCPU}" ${URL_DVCPU}
+
+    CMD=$(ps ux | grep 'java' | grep -v 'grep' | grep -v 'zimbra' | cut -c21-25)
+    DVMEM='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '$CMD' }'
+    curl -d "${DVMEM}" ${URL_DVMEM}
+    
+    count=1
+    str=''
+    while [ $count -lt $(($GRAPHLENGTH)) ]
+    do
+	prev=$count
+        (( count++ ))
+        graph[$prev]=$((graph[$count]))
+        if [ $prev -eq 1 ]
+        then
+            str=$str'{ "x": '$prev', "y": '${graph[$prev]}' }'
+        else
+            str=$str', { "x": '$prev', "y": '${graph[$prev]}' }'
+        fi
+    done
+
+    graph[$GRAPHLENGTH]=$(/usr/sbin/ss -o state established | grep 192.168.11.245 | wc -l)
+    # test
+    # graph[$GRAPHLENGTH]=$(($RANDOM%11))
+    str='{ "auth_token": "YOUR_AUTH_TOKEN", "points" : [ '$str', { "x": '$GRAPHLENGTH', "y": '${graph[$GRAPHLENGTH]}' } ] }'
+    echo ${str} > ${GRAPHDATA}
+    curl -X POST --data @${GRAPHDATA} -H "Content-Type: application/json" ${URL_GRAPH}
+done
