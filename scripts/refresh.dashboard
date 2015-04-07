@@ -15,7 +15,7 @@ URL_EXSESSIONS=${URL_DASHING}'/widgets/excsessions'
 URL_SQUIDSESSIONS=${URL_DASHING}'/widgets/squidsessions'
 URL_ETH0_GRAPH=${URL_DASHING}'/widgets/eth0graph'
 URL_ETH1_GRAPH=${URL_DASHING}'/widgets/eth1graph'
-URL_LANGATE_LOAD=${URL_DASHING}'/widgets/loadlangate'
+URL_LANGATE_LOAD=${URL_DASHING}'/widgets/langate-load'
 
 # graph arrays
 eth0graph=0
@@ -98,7 +98,7 @@ do
     then
 	LANGATE_WD_COUNT=0        
         LG_LOAD=$(uptime | awk '{print $10}' | cut -d, -f1)
-        LG_DATA='{ "auth_token": "YOUR_AUTH_TOKEN", "current": "'${LG_LOAD}'" }'
+        LG_DATA='{ "auth_token": "YOUR_AUTH_TOKEN", "value" : '${LG_LOAD}' }'
         curl -d "${LG_DATA}" ${URL_LANGATE_LOAD}
     fi
     (( LANGATE_WD_COUNT++ ))
