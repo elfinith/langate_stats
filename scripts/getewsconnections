@@ -2,7 +2,7 @@
 cd /home/cache/stats/test/scripts
 ./watch.ifaces
 (./getping 192.168.11.244 |tr '\n' ' '; ./getping 8.8.8.8 | tr '\n' ' '; ./getping owa.oat-group.ru | tr '\n' ' '; ./spd.eth1) | tee >> /home/cache/log/internet.connection.log
-( date '+%F %T' | tr '\n' ' '; /usr/sbin/lsof -i :443 | grep mail.oat-group.ru | wc -l | tr '\n' ' '; /usr/sbin/lsof -i :1143 | wc -l | tr '\n' ' ';  top -b -n 1 | grep java | grep root | cut -c42-50 | tail -n 1) | tee >> /home/cache/log/owa.oat-group.ru.count.log
+( date '+%F %T' | tr '\n' ' '; /usr/bin/netstat-nat -n | grep '188.128.94.10:443' | awk '{print $2}' | sed 's#:.*##' | uniq | wc -l | tr '\n' ' '; /usr/sbin/lsof -i :1143 | wc -l | tr '\n' ' ';  top -b -n 1 | grep java | grep root | cut -c42-50 | tail -n 1) | tee >> /home/cache/log/owa.oat-group.ru.count.log
 cat /home/cache/log/owa.oat-group.ru.count.log | tr ' ' ',' | tr -s , | sed 's/.$//' > ../data/owa.oat-group.ru.count.csv
 grep FAIL /home/cache/log/internet.connection.log > ../data/fails.txt
 ./spd.eth.all >> ../data/speed.ifaces.csv
