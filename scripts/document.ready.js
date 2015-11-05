@@ -176,6 +176,56 @@
 		series: []
 	};
 	
+	<!-- Настройки графика 4 -->													
+	var chart4options = {
+		chart: {
+			renderTo: 'container4',
+			zoomType: 'x'
+		},
+		title: {
+			text: 'Количество сессий удалённого подключения'
+		},
+		xAxis: {
+			type: 'datetime',
+			minRange: 10 
+		},
+		yAxis: {
+			title: {
+				text: 'Соединений'
+			},					
+			min: 0
+		},
+		legend: {
+			enabled: true
+		},
+		tooltip: {
+			shared: true
+		},	
+		plotOptions: {
+			area: {
+				fillColor: {
+					linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+					stops: [
+						[0, Highcharts.getOptions().colors[0]],
+						[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+					]
+				},
+				marker: {
+					radius: 2
+				},
+				lineWidth: 1,
+				states: {
+					hover: {
+						lineWidth: 1
+					}
+				},
+				threshold: null
+			}
+		},
+		series: []
+	};
+	
+	
 	<!-- Формирование графика 1 -->										
 	$.get('data/owa.oat-group.ru.count.csv', function(data) {			
 		var lines = data.split('\n');
@@ -369,6 +419,58 @@
 		chart3options.series.push(series14);
 		var chart = new Highcharts.Chart(chart3options);											
 	});					
+
+	<!-- Формирование графика 4 -->										
+	$.get('data/remote.sessions.count.csv', function(data) {			
+		var lines = data.split('\n');
+		var datPointStart = Date.UTC(curYear, month_value, 1, 4, 10);
+		var series15 = {
+			type: 'area',
+			name: 'RDP',
+			pointInterval: intPointInterval,
+			pointStart: datPointStart,
+			data: []
+		};
+		var series16 = {
+	        type: 'area',
+			name: 'VPN (авторизованные сессии)',
+			pointInterval: intPointInterval,
+			pointStart: datPointStart,
+			data: []
+		};
+		var series17 = {
+			type: 'area',
+			name: 'VPN (всего подключений)',
+			pointInterval: intPointInterval,
+			pointStart: datPointStart,
+			data: []
+		};
+		var series18 = {
+			type: 'line',
+			name: 'SSH (всего подключений)',
+			pointInterval: intPointInterval,
+			pointStart: datPointStart,
+			data: []
+		};
+		$.each(lines, function(lineNo, line) {
+			var items = line.split(',');
+			$.each(items, function(itemNo, item) {						
+				switch (itemNo) {
+					case 2: series15.data.push(parseInt(item)); break
+					case 3: series16.data.push(parseInt(item)); break
+					case 4: series17.data.push(parseInt(item)); break   
+					case 5: series18.data.push(parseInt(item)); break
+					default: break
+				}						
+			});
+		});
+		chart4options.series.push(series15);
+		chart4options.series.push(series16);
+		chart4options.series.push(series17);
+		chart4options.series.push(series18);
+		var chart = new Highcharts.Chart(chart4options);															
+	});		
+
 	
 	<!-- Загрузка лога ошибок -->				
 	$("#iframe").load(setWidth);
