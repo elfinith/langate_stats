@@ -1,0 +1,2 @@
+#!/bin/bash
+( date '+%F,%T' | tr '\n' ','; /usr/bin/netstat-nat -n | grep '188.128.94.10:3389' | wc -l | tr '\n' ','; /usr/bin/last | grep vpn | grep 'still logged in' | wc -l | tr '\n' ','; netstat -ntu | grep '192.168.11.245:1743' | grep ESTABLISHED | wc -l | tr '\n' ','; netstat -ntu | grep '192.168.11.245:22' | grep ESTABLISHED | wc -l ) | tee >> ../data/remote.sessions.count.log
